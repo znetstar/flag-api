@@ -1,0 +1,1 @@
+Retrives flags from Wikimedia Commons and redirects to their location
