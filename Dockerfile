@@ -1,12 +1,12 @@
-FROM node:7
+FROM node:10
 
 ADD . /app
 
 WORKDIR /app
 
-EXPOSE 3000
+EXPOSE 80
 
-ENV PORT 3000
+ENV PORT 80
 
 RUN npm install
 

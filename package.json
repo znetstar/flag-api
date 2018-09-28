@@ -2,13 +2,19 @@
   "name": "flag-api",
   "version": "1.0.0",
   "main": "server.js",
-  "license": "MIT",
+  "license": "CC0-1.0",
+  "author": "Zachary Boyd <zachary@zacharyboyd.nyc>",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
     "cheerio": "^0.22.0",
     "express": "^4.14.0",
-    "request": "^2.79.0"
+    "request": "^2.79.0",
+    "request-promise-native": "^1.0.5"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/znetstar/flag-api"
   }
 }

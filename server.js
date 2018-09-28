@@ -1,14 +1,14 @@
+const { Server } = require('http');
 const express = require('express');
 const cheerio = require('cheerio');
-const request = require('request');
-const Server = require('http').Server;
+const request = require('request-promise-native');
 
 const app = express();
 const http_server = new Server(app);
 const cache = {};
 
-app.get('/:country', (req, res) => {
-	let country = req.params.country
+app.get('/:country', async (req, res) => {
+	const country = req.params.country
 					.split(' ')
 					.map((t) => {
 						t = t[0].toUpperCase() + t.substr(1);
@@ -17,25 +17,33 @@ app.get('/:country', (req, res) => {
 					.join('_');
 
 	if (cache[country])
-		return res.redirect(cache[country]);
+		return res.redirect(cache[country], 301);
+	
+	try {
+		const $ = await request({
+			url: `https://commons.wikimedia.org/wiki/File:Flag_of_${country}.svg`,
+			transform: (body) => cheerio.load(body)
+		});	
 
-	request({
-		url: `https://commons.wikimedia.org/wiki/File:Flag_of_${country}.svg`
-	}, (e,r,b) => {
-		if (res.statusCode === 404 || !b || b.indexOf('No file by this name exists') !== -1)
-			return res.status(404).end();
-
-		let $ = cheerio.load(b);
-
-		let u = $('.fullMedia > a').attr('href');
-		cache[country] = u;
-		res.redirect(u);
-	});
+		let url = $('.fullMedia > a').attr('href');
+		cache[country] = url;
+		res.redirect(url, 301);
+	} catch (error) {
+		let status = 500;
+		if (error.stack.substr(0, 16) === 'StatusCodeError:') {
+			status = Number(error.stack.match(/^StatusCodeError: (\d\d\d)/)[1]);
+		}
+		res.status(status).end();
+	}
 });
 
-let port = Number(process.env.PORT) || 3000;
+const port = Number(process.env.PORT) || 3000;
+
 http_server.listen(port, (err) => {
-	if (err) process.exit(1);
+	if (err) {
+		console.error(err.message);
+		process.exit(1);
+	}
 
 	console.log(`Listening on ${port}`);
 });
